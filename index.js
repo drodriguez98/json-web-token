@@ -1,19 +1,18 @@
-/* Creando Servidor Express y definiendo Rutas con Express Router*/
-require("dotenv").config(); /* Importando dotenv para variables de entorno */
-const express = require("express");
+import dotenv from "dotenv";
+import bodyParser from "body-parser";
+import cors from "cors";
+import express from "express";
+
+import router from "./src/routes/router.js";
+
+dotenv.config();
+
 const app = express();
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const router = require("./src/routes/router");
 
-/* Definiendo el PUERTO desde variables de entorno */
-const PUERTO = process.env.PUERTO;
-
-/* Importando cors y bodyParser */
 app.use(cors());
 app.use(bodyParser.json());
 
-/* Agregando las Rutas de la API */
 app.use("/api", router);
 
-app.listen(PUERTO, () => console.log(`SERVIDOR EN EL PUERTO ${PUERTO} :)`));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));

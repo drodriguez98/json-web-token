@@ -1,46 +1,39 @@
-/* Importando Express y Express Router */
-const express = require("express");
-const router = express.Router();
+import express from "express"
 
-/* Importando bycrypt para la Encriptacion del password*/
-const bcrypt = require("bcryptjs");
-/* Importando uuid para la asignacion de un ID único para cada usuario*/
-const uuid = require("uuid");
-/* Importando JSONWebToken para la generación del Token de Usuario (sesión) */
-const jwt = require("jsonwebtoken");
+import pool from "../database/db.js"
+import { register } from "../controllers/register.js"
+import { login } from "../controllers/login.js"
+import userMiddleware from "../middleware/users.js"
 
-const pool = require("../conexionDB/db");
-const promisePool = pool.promise();
-const { registro } = require("../controllers/registro");
-const { logueo } = require("../controllers/logueo");
-/* Importando los MiddleWares | Validación */
+const router = express.Router()
 
-const userMiddleware = require("../middleware/users");
+const promisePool = pool.promise()
 
-router.get("/", (req, res) => {
-  res.send(
-    `[API] STACKLYAPI FUNCIONANDO CORRECTAMENTE | TIEMPO EN LINEA ${parseInt(
-      process.uptime()
-    )}s [API] `
-  );
-});
+router.get("/wellcome", (req, res) => { 
+  
+  res.send('Bienvenido! Inicia sesión para obtener un token y acceder a tu perfil privado.')
 
-/* Creando la ruta de Registro*/
-router.post("/registro", userMiddleware.validateRegister, registro);
+})
 
-router.post("/login", logueo);
+router.post("/register", userMiddleware.validateRegister, register)
+
+router.post("/login", login)
 
 router.get("/profile", userMiddleware.isLoggedIn, async (req, res, next) => {
-  console.log(req.userData);
-  const [[user]] = await promisePool.query(
-    `SELECT * FROM USUARIOS WHERE LOWER(id) = LOWER("${req.userData.id}")`
-  );
-  res.json({
-    ID: user.id,
-    USUARIO: user.usuario,
-    PASSWORD: user.password,
-    FECHA_DE_REGISTRO: user.fecha__registro,
-  });
-});
 
-module.exports = router;
+  console.log(req.userData)
+
+  const [[user]] = await promisePool.query(`SELECT * FROM USERS WHERE LOWER(id) = LOWER(?)`, [req.userData.id])
+
+  res.json({
+
+    ID: user.id,
+    USER: user.user,
+    PASSWORD: user.password,
+    DATEADDED: user.dateAdded,
+
+  })
+
+})
+
+export default router;
